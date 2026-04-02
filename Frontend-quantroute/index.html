@@ -1,1 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantRoute — Quantum-Inspired Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08090c;
+    --bg2: #0e1016;
+    --bg3: #13151d;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --text2: #7a7f94;
+    --text3: #464b5e;
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --teal: #00d4aa;
+    --coral: #ff6b6b;
+    --amber: #fbbf24;
+    --green: #34d399;
+    --font: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Grid background ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    background: rgba(8,9,12,0.8);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .logo-mark::before {
+    content: '';
+    position: absolute; inset: 4px;
+    border-radius: 4px;
+    background: var(--accent);
+    opacity: 0.2;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .logo-mark svg { position: relative; z-index: 1; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.3); opacity: 0.4; }
+  }
+
+  .logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+  .logo-text span { color: var(--accent2); }
+
+  .header-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text2);
+    background: var(--bg2);
+  }
+
+  .header-right { display: flex; gap: 10px; align-items: center; }
+
+  /* ── Layout ── */
+  .app {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr 280px;
+    grid-template-rows: auto 1fr;
+    height: calc(100vh - 65px);
+    gap: 0;
+  }
+
+  /* ── Side panels ── */
+  .side-panel {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .side-panel.right {
+    border-right: none;
+    border-left: 1px solid var(--border);
+  }
+
+  .panel-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* ── Mode Tabs ── */
+  .tab-group {
+    display: flex;
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 3px;
+    margin-bottom: 16px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 7px 4px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ── Algo cards ── */
+  .algo-grid { display: flex; flex-direction: column; gap: 8px; }
+
+  .algo-card {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .algo-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .algo-card.active {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.08);
+  }
+
+  .algo-card.active::before { opacity: 1; }
+
+  .algo-name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .algo-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .algo-desc { font-size: 11px; color: var(--text2); }
+
+  /* ── Sliders ── */
+  .param-row { margin-bottom: 14px; }
+
+  .param-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+
+  .param-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+    outline: none;
+    border: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+    transition: transform 0.1s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  /* ── Buttons ── */
+  .btn-run {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-run::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.15s;
+  }
+
+  .btn-run:hover::after { background: rgba(255,255,255,0.1); }
+  .btn-run:active { transform: scale(0.98); }
+  .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+
+  /* ── Canvas area ── */
+  .canvas-area {
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .canvas-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text2);
+    background: var(--bg2);
+    flex-shrink: 0;
+  }
+
+  .toolbar-hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .canvas-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  canvas#mapCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--border);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--teal));
+    width: 0%;
+    transition: width 0.2s;
+  }
+
+  /* ── Right panel: metrics ── */
+  .metric-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .metric-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 4px 0;
+  }
+
+  .metric-val.good { color: var(--green); }
+  .metric-val.warn { color: var(--amber); }
+
+  .metric-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text2);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* ── Convergence chart ── */
+  .chart-wrap {
+    position: relative;
+    height: 120px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  canvas#chartCanvas {
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* ── Log terminal ── */
+  .terminal {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 160px;
+  }
+
+  .terminal-header {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .terminal-dots { display: flex; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #27c93f; }
+
+  .terminal-body {
+    padding: 10px 12px;
+    overflow-y: auto;
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+
+  .log-line { display: block; }
+  .log-line.success { color: var(--green); }
+  .log-line.info { color: var(--accent2); }
+  .log-line.warn { color: var(--amber); }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 0;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-line {
+    width: 20px; height: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Animation ── */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-section { animation: fadeSlideIn 0.3s ease both; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── Running state ── */
+  .btn-run.running {
+    animation: shimmer 1.2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ── Node hover status ── */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+  }
+
+  .status-dot.active { background: var(--teal); animation: blink 1s ease-in-out infinite; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 2L16 6V12L9 16L2 12V6L9 2Z" stroke="#6c63ff" stroke-width="1.5" fill="none"/>
+        <circle cx="9" cy="9" r="2.5" fill="#a78bfa"/>
+        <line x1="9" y1="2" x2="9" y2="6.5" stroke="#6c63ff" stroke-width="1"/>
+        <line x1="9" y1="11.5" x2="9" y2="16" stroke="#6c63ff" stroke-width="1"/>
+        <line x1="2" y1="6" x2="6.8" y2="8.5" stroke="#6c63ff" stroke-width="1"/>
+        <line x1="11.2" y1="9.5" x2="16" y2="12" stroke="#6c63ff" stroke-width="1"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">Quant<span>Route</span></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill" id="apiStatus">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">frontend-only mode</span>
+    </div>
+    <div class="header-badge">v1.0.0 · hackathon</div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="side-panel">
+
+    <div class="panel-section">
+      <div class="section-label">Modo de problema</div>
+      <div class="tab-group">
+        <button class="tab active" id="tab-tsp" onclick="setMode('tsp')">TSP</button>
+        <button class="tab" id="tab-vrp" onclick="setMode('vrp')">VRP</button>
+        <button class="tab" id="tab-assign" onclick="setMode('assign')">Assign</button>
+      </div>
+      <div class="param-row" id="row-vehicles" style="display:none">
+        <div class="param-label">Vehículos / agentes <span class="param-val" id="v-veh">3</span></div>
+        <input type="range" min="2" max="8" value="3" step="1" oninput="p('veh',this.value)">
+      </div>
+      <div class="param-row" id="row-nodes">
+        <div class="param-label">Nodos en el mapa <span class="param-val" id="v-nodes">14</span></div>
+        <input type="range" min="5" max="30" value="14" step="1" oninput="p('nodes',this.value)">
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Algoritmo</div>
+      <div class="algo-grid">
+        <div class="algo-card active" id="algo-sa" onclick="setAlgo('sa')">
+          <div class="algo-name">Simulated Annealing</div>
+          <div class="algo-sub">⟷ Quantum Tunneling</div>
+          <div class="algo-desc">Acepta soluciones peores con prob. e^(-ΔE/T)</div>
+        </div>
+        <div class="algo-card" id="algo-ga" onclick="setAlgo('ga')">
+          <div class="algo-name">Genetic Algorithm</div>
+          <div class="algo-sub">⊕ Quantum Superposition</div>
+          <div class="algo-desc">Población evolutiva con crossover y mutación</div>
+        </div>
+        <div class="algo-card" id="algo-aco" onclick="setAlgo('aco')">
+          <div class="algo-name">Ant Colony Optim.</div>
+          <div class="algo-sub">∿ Quantum Walk</div>
+          <div class="algo-desc">Refuerzo probabilístico de feromonas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Parámetros cuánticos</div>
+      <div class="param-row">
+        <div class="param-label">Temperatura inicial T₀ <span class="param-val" id="v-temp">1200</span></div>
+        <input type="range" min="100" max="5000" value="1200" step="100" oninput="p('temp',this.value)">
+      </div>
+      <div class="param-row">
+        <div class="param-label">Factor de enfriamiento α <span class="param-val" id="v-cool">0.975</span></div>
+        <input type="range" min="0.80" max="0.999" value="0.975" step="0.001" oninput="p('cool',this.value)">
+      </div>
+      <div class="param-row">
+        <div class="param-label">Iteraciones <span class="param-val" id="v-iters">6000</span></div>
+        <input type="range" min="500" max="20000" value="6000" step="500" oninput="p('iters',this.value)">
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">API backend</div>
+      <div class="param-row">
+        <div class="param-label" style="font-size:11px;color:var(--text2)">Endpoint URL</div>
+        <input type="text" id="apiUrl" value="http://localhost:8000"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--text2);outline:none;margin-top:4px;">
+      </div>
+      <button class="btn-secondary" onclick="checkApi()">Verificar conexión</button>
+    </div>
+
+    <button class="btn-run" id="btnRun" onclick="runOpt()">⚡ Ejecutar optimización</button>
+    <button class="btn-secondary" onclick="genNodes()">↻ Nueva instancia</button>
+  </div>
+
+  <!-- ── CANVAS ── -->
+  <div class="canvas-area">
+    <div class="canvas-toolbar">
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#6c63ff;width:12px;height:12px;border-radius:50%"></div>Depósito</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#00d4aa"></div>Destino</div>
+        <div class="legend-item"><div class="legend-line" style="background:#6c63ff"></div>Ruta óptima</div>
+        <div class="legend-item"><div class="legend-line" style="background:#ff6b6b;opacity:0.4"></div>Ruta inicial</div>
+      </div>
+      <div class="toolbar-hint">clic para agregar nodo · scroll para zoom</div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="mapCanvas" onclick="addNode(event)"></canvas>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progFill"></div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="side-panel right">
+
+    <div class="panel-section">
+      <div class="section-label">Métricas de solución</div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Costo inicial</div>
+          <div class="metric-val" id="mInitial">—</div>
+          <div class="metric-sub">distancia greedy</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Costo óptimo</div>
+          <div class="metric-val good" id="mBest">—</div>
+          <div class="metric-sub">post-optimización</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Mejora</div>
+          <div class="metric-val good" id="mImpr">—</div>
+          <div class="metric-sub">reducción de costo</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Tiempo</div>
+          <div class="metric-val" id="mTime">—</div>
+          <div class="metric-sub">milisegundos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Convergencia del algoritmo</div>
+      <div class="chart-wrap">
+        <canvas id="chartCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="panel-section" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="section-label">Log de ejecución</div>
+      <div class="terminal" style="flex:1">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          </div>
+          quantroute · execution log
+        </div>
+        <div class="terminal-body" id="logBody">
+          <span class="log-line info">// QuantRoute v1.0.0 ready</span>
+          <span class="log-line">// Genera una instancia y ejecuta</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+  mode: 'tsp', algo: 'sa', running: false,
+  params: { nodes: 14, temp: 1200, cool: 0.975, iters: 6000, veh: 3 },
+  nodes: [], depot: null,
+  initialTour: [], bestTour: [], routes: [],
+  convergence: [],
+};
+
+// ─── Canvas setup ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+const ROUTE_COLORS = ['#6c63ff','#00d4aa','#ff6b6b','#fbbf24','#a78bfa','#34d399','#f472b6','#60a5fa'];
+
+function resizeCanvas() {
+  const wrap = canvas.parentElement;
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  draw();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+// ─── Setters ──────────────────────────────────────────────────────────────────
+function setMode(m) {
+  state.mode = m;
+  ['tsp','vrp','assign'].forEach(x => {
+    document.getElementById('tab-'+x).classList.toggle('active', x===m);
+  });
+  const show = m !== 'tsp';
+  document.getElementById('row-vehicles').style.display = show ? '' : 'none';
+  genNodes();
+}
+
+function setAlgo(a) {
+  state.algo = a;
+  ['sa','ga','aco'].forEach(x => {
+    document.getElementById('algo-'+x).classList.toggle('active', x===a);
+  });
+}
+
+function p(k, v) {
+  state.params[k] = +v;
+  const map = { nodes:'v-nodes', temp:'v-temp', cool:'v-cool', iters:'v-iters', veh:'v-veh' };
+  const el = document.getElementById(map[k]);
+  if (el) el.textContent = k==='cool' ? (+v).toFixed(3) : v;
+}
+
+// ─── Node generation ──────────────────────────────────────────────────────────
+function genNodes() {
+  const w = canvas.width, h = canvas.height;
+  state.nodes = [];
+  for (let i = 0; i < state.params.nodes; i++) {
+    state.nodes.push({ id: i, x: 50 + Math.random()*(w-100), y: 50 + Math.random()*(h-100), demand: +(0.5+Math.random()*2).toFixed(1) });
+  }
+  state.depot = state.nodes[0];
+  state.initialTour = []; state.bestTour = []; state.routes = []; state.convergence = [];
+  clearMetrics();
+  draw();
+}
+
+function addNode(e) {
+  if (state.running) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  state.nodes.push({ id: state.nodes.length, x, y, demand: 1 });
+  state.initialTour = []; state.bestTour = [];
+  draw();
+}
+
+// ─── Distance utilities ────────────────────────────────────────────────────────
+const D = (a, b) => Math.hypot(a.x-b.x, a.y-b.y);
+
+function tourCost(tour) {
+  const ns = state.nodes;
+  return tour.reduce((s, v, i) => s + D(ns[v], ns[tour[(i+1)%tour.length]]), 0);
+}
+
+function greedyTour() {
+  const n = state.nodes.length;
+  const vis = new Array(n).fill(false);
+  const tour = [0]; vis[0] = true;
+  for (let i = 1; i < n; i++) {
+    let best = -1, bd = Infinity;
+    for (let j = 0; j < n; j++) {
+      if (!vis[j]) { const d = D(state.nodes[tour[tour.length-1]], state.nodes[j]); if (d < bd) { bd=d; best=j; } }
+    }
+    tour.push(best); vis[best] = true;
+  }
+  return tour;
+}
+
+// ─── Simulated Annealing ──────────────────────────────────────────────────────
+function simulatedAnnealing(init) {
+  let cur = [...init], cCost = tourCost(cur);
+  let best = [...cur], bCost = cCost;
+  let T = state.params.temp, alpha = state.params.cool;
+  const n = cur.length, iters = state.params.iters;
+  const hist = [cCost];
+
+  for (let it = 0; it < iters; it++) {
+    let i = 1 + Math.floor(Math.random()*(n-1));
+    let j = 1 + Math.floor(Math.random()*(n-1));
+    if (i===j) continue;
+    const nb = [...cur]; nb.splice(i, 0, nb.splice(j, 1)[0]); // or-opt move
+    const nc = tourCost(nb);
+    const dE = nc - cCost;
+    if (dE < 0 || Math.random() < Math.exp(-dE / Math.max(T, 1e-8))) { cur = nb; cCost = nc; }
+    if (cCost < bCost) { best = [...cur]; bCost = cCost; }
+    T *= alpha;
+    if (it % Math.max(1, Math.floor(iters/60)) === 0) hist.push(bCost);
+  }
+  return { tour: best, cost: bCost, hist };
+}
+
+// ─── Genetic Algorithm ────────────────────────────────────────────────────────
+function geneticAlgo(init) {
+  const n = init.length;
+  const POP = 40, GENS = Math.floor(state.params.iters / POP);
+  const shuffle = t => { const r=[...t]; for(let i=r.length-1;i>0;i--){const j=0|Math.random()*(i+1);[r[i],r[j]]=[r[j],r[i]];} return r; };
+  const oxCross = (p1,p2) => {
+    const a=1+Math.floor(Math.random()*(n-2)), b=1+Math.floor(Math.random()*(n-2));
+    const [lo,hi]=[Math.min(a,b),Math.max(a,b)];
+    const ch=new Array(n).fill(-1); ch.splice(lo,hi-lo,...p1.slice(lo,hi));
+    const fill=p2.filter(x=>!ch.includes(x)); let fi=0;
+    return ch.map(x=>x===-1?fill[fi++]:x);
+  };
+  let pop = Array.from({length:POP}, ()=>shuffle(init));
+  pop[0] = [...init];
+  pop.sort((a,b)=>tourCost(a)-tourCost(b));
+  let best=[...pop[0]], bCost=tourCost(best);
+  const hist=[bCost];
+
+  for (let g=0; g<GENS; g++) {
+    const elite = pop.slice(0,8);
+    const next = [...elite];
+    while (next.length < POP) {
+      const p1=pop[Math.floor(Math.random()*20)];
+      const p2=pop[Math.floor(Math.random()*20)];
+      let ch=oxCross(p1,p2);
+      if (Math.random()<0.12) { const i=1+Math.floor(Math.random()*(n-1)),j=1+Math.floor(Math.random()*(n-1));[ch[i],ch[j]]=[ch[j],ch[i]]; }
+      next.push(ch);
+    }
+    pop = next.sort((a,b)=>tourCost(a)-tourCost(b));
+    const bc=tourCost(pop[0]);
+    if (bc<bCost){bCost=bc;best=[...pop[0]];}
+    if (g%4===0) hist.push(bCost);
+  }
+  return { tour: best, cost: bCost, hist };
+}
+
+// ─── Ant Colony Optimization ──────────────────────────────────────────────────
+function acoAlgo(init) {
+  const n = state.nodes.length;
+  const ANTS = 25, ITERS = Math.floor(state.params.iters/ANTS);
+  const α=1.2, β=2.5, ρ=0.4, Q=100;
+  const ph = Array.from({length:n},()=>new Array(n).fill(1.0));
+  let best=[...init], bCost=tourCost(init);
+  const hist=[bCost];
+
+  for (let it=0; it<ITERS; it++) {
+    const solutions=[];
+    for (let a=0; a<ANTS; a++) {
+      const vis=new Array(n).fill(false);
+      const path=[0]; vis[0]=true;
+      for (let s=1;s<n;s++) {
+        const cur=path[path.length-1];
+        const probs=[]; let sum=0;
+        for (let j=0;j<n;j++) {
+          if (!vis[j]) {
+            const dd=D(state.nodes[cur],state.nodes[j]);
+            const score=Math.pow(ph[cur][j],α)*Math.pow(1/Math.max(dd,0.01),β);
+            probs.push({j,score}); sum+=score;
+          }
+        }
+        let r=Math.random()*sum, chosen=probs[probs.length-1].j;
+        for (const {j,score} of probs) { r-=score; if(r<=0){chosen=j;break;} }
+        path.push(chosen); vis[chosen]=true;
+      }
+      const c=tourCost(path); solutions.push({path,c});
+      if(c<bCost){bCost=c;best=[...path];}
+    }
+    for (let i=0;i<n;i++) for (let j=0;j<n;j++) ph[i][j]*=(1-ρ);
+    for (const {path,c} of solutions) {
+      for (let i=0;i<path.length;i++){const a=path[i],b=path[(i+1)%n];ph[a][b]+=Q/c;ph[b][a]+=Q/c;}
+    }
+    if(it%4===0) hist.push(bCost);
+  }
+  return { tour: best, cost: bCost, hist };
+}
+
+// ─── VRP split ────────────────────────────────────────────────────────────────
+function splitVRP(tour) {
+  const v = state.params.veh;
+  const body = tour.slice(1);
+  const sz = Math.ceil(body.length/v);
+  const routes = [];
+  for (let i=0;i<v;i++) {
+    const seg = body.slice(i*sz,(i+1)*sz);
+    if (seg.length) routes.push([tour[0],...seg]);
+  }
+  return routes;
+}
+
+// ─── Main optimization runner ─────────────────────────────────────────────────
+async function runOpt() {
+  if (state.running || state.nodes.length < 4) { addLog('Necesitas al menos 4 nodos', 'warn'); return; }
+  state.running = true;
+  document.getElementById('btnRun').disabled = true;
+  document.getElementById('btnRun').textContent = '⏳ Optimizando...';
+  document.getElementById('btnRun').classList.add('running');
+  clearMetrics();
+
+  // Try API first
+  const apiUrl = document.getElementById('apiUrl').value.trim();
+  let usedApi = false;
+
+  try {
+    const payload = {
+      nodes: state.nodes,
+      depot_id: state.nodes[0].id,
+      mode: state.mode,
+      algorithm: state.algo,
+      vehicles: state.params.veh,
+      temperature: state.params.temp,
+      cooling_rate: state.params.cool,
+      iterations: state.params.iters,
+    };
+    addLog(`[API] POST ${apiUrl}/optimize`, 'info');
+    setProgress(20);
+    const res = await fetch(`${apiUrl}/optimize`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      usedApi = true;
+      addLog(`[API] Respuesta OK · ${data.elapsed_ms}ms`, 'success');
+      setProgress(100);
+      const greedy = greedyTour();
+      state.initialTour = greedy;
+      const mainRoute = data.routes[0];
+      state.bestTour = mainRoute.tour;
+      if (data.routes.length > 1) state.routes = data.routes.map(r=>r.tour);
+      state.convergence = data.convergence;
+      updateMetrics(data.initial_cost, data.total_cost, data.improvement_pct, data.elapsed_ms);
+      addLog(`[RESULT] Costo: ${Math.round(data.initial_cost)} → ${Math.round(data.total_cost)}`, 'success');
+      addLog(`[RESULT] Mejora: ${data.improvement_pct}% · Algo: ${data.algorithm}`, 'success');
+    }
+  } catch (e) {
+    addLog(`[API] Sin conexión · usando motor local`, 'warn');
+  }
+
+  if (!usedApi) {
+    const greedy = greedyTour();
+    state.initialTour = greedy;
+    const ic = tourCost(greedy);
+    document.getElementById('mInitial').textContent = Math.round(ic);
+    addLog(`[LOCAL] Solución greedy: ${Math.round(ic)}`, 'info');
+    addLog(`[LOCAL] Ejecutando ${state.algo.toUpperCase()} · ${state.params.iters} iters`, 'info');
+    setProgress(30);
+    await sleep(20);
+
+    const t0 = performance.now();
+    let result;
+    if (state.algo==='sa') result = simulatedAnnealing(greedy);
+    else if (state.algo==='ga') result = geneticAlgo(greedy);
+    else result = acoAlgo(greedy);
+    const elapsed = Math.round(performance.now()-t0);
+
+    state.bestTour = result.tour;
+    state.convergence = result.hist;
+    if (state.mode!=='tsp') state.routes = splitVRP(result.tour);
+    const impr = ((ic-result.cost)/ic*100).toFixed(1);
+    updateMetrics(ic, result.cost, impr, elapsed);
+    addLog(`[RESULT] Óptimo: ${Math.round(result.cost)} (↓${impr}%)`, 'success');
+    addLog(`[RESULT] Tiempo: ${elapsed}ms · T_final: ${(state.params.temp*Math.pow(state.params.cool,state.params.iters)).toFixed(2)}`, 'success');
+    setProgress(100);
+  }
+
+  draw();
+  drawChart();
+  state.running = false;
+  document.getElementById('btnRun').disabled = false;
+  document.getElementById('btnRun').textContent = '⚡ Ejecutar optimización';
+  document.getElementById('btnRun').classList.remove('running');
+}
+
+// ─── Draw map ─────────────────────────────────────────────────────────────────
+function draw() {
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // Initial tour (red dashed)
+  if (state.initialTour.length > 1 && state.bestTour.length > 0) {
+    ctx.save();
+    ctx.setLineDash([5,5]);
+    ctx.strokeStyle = 'rgba(255,107,107,0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    state.initialTour.forEach((v,i) => {
+      const nd = state.nodes[v];
+      i===0 ? ctx.moveTo(nd.x,nd.y) : ctx.lineTo(nd.x,nd.y);
+    });
+    ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+
+  // Optimal route(s)
+  if (state.mode !== 'tsp' && state.routes.length > 0) {
+    state.routes.forEach((r, ri) => {
+      ctx.save();
+      ctx.strokeStyle = ROUTE_COLORS[ri % ROUTE_COLORS.length];
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = ROUTE_COLORS[ri % ROUTE_COLORS.length];
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      r.forEach((v,i) => {
+        const nd = state.nodes[v];
+        i===0 ? ctx.moveTo(nd.x,nd.y) : ctx.lineTo(nd.x,nd.y);
+      });
+      ctx.closePath(); ctx.stroke(); ctx.restore();
+    });
+  } else if (state.bestTour.length > 1) {
+    ctx.save();
+    ctx.strokeStyle = '#6c63ff';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#6c63ff';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    state.bestTour.forEach((v,i) => {
+      const nd = state.nodes[v];
+      i===0 ? ctx.moveTo(nd.x,nd.y) : ctx.lineTo(nd.x,nd.y);
+    });
+    ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+
+  // Nodes
+  state.nodes.forEach((nd, i) => {
+    const isDepot = i === 0;
+    const r = isDepot ? 11 : 8;
+    const color = isDepot ? '#6c63ff' : '#00d4aa';
+
+    // Glow
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(nd.x, nd.y, r, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+
+    // Border
+    ctx.beginPath();
+    ctx.arc(nd.x, nd.y, r, 0, Math.PI*2);
+    ctx.strokeStyle = '#08090c';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${isDepot?11:9}px 'Syne', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(isDepot ? 'D' : i, nd.x, nd.y);
+  });
+
+  // Stats overlay if no solution yet
+  if (!state.bestTour.length && state.nodes.length > 0) {
+    ctx.fillStyle = 'rgba(122,127,148,0.5)';
+    ctx.font = '500 13px Syne';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${state.nodes.length} nodos · Presiona "Ejecutar optimización"`, w/2, h-24);
+  }
+}
+
+// ─── Chart ────────────────────────────────────────────────────────────────────
+function drawChart() {
+  const cc = document.getElementById('chartCanvas');
+  const cctx = cc.getContext('2d');
+  const wrap = cc.parentElement;
+  cc.width = wrap.clientWidth;
+  cc.height = wrap.clientHeight;
+  const w=cc.width, h=cc.height, pad=12;
+  cctx.clearRect(0,0,w,h);
+
+  const data = state.convergence;
+  if (data.length < 2) return;
+  const mn=Math.min(...data), mx=Math.max(...data);
+  const range = mx-mn || 1;
+
+  // Grid lines
+  cctx.strokeStyle='rgba(255,255,255,0.05)';
+  cctx.lineWidth=0.5;
+  for (let i=1;i<4;i++) {
+    const y=pad+(h-2*pad)*i/4;
+    cctx.beginPath(); cctx.moveTo(pad,y); cctx.lineTo(w-pad,y); cctx.stroke();
+  }
+
+  // Fill under curve
+  cctx.beginPath();
+  data.forEach((v,i) => {
+    const x=pad+(w-2*pad)*i/(data.length-1);
+    const y=pad+(h-2*pad)*(1-(v-mn)/range);
+    i===0?cctx.moveTo(x,y):cctx.lineTo(x,y);
+  });
+  cctx.lineTo(w-pad,h-pad); cctx.lineTo(pad,h-pad); cctx.closePath();
+  const grad=cctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'rgba(108,99,255,0.3)');
+  grad.addColorStop(1,'rgba(108,99,255,0)');
+  cctx.fillStyle=grad; cctx.fill();
+
+  // Line
+  cctx.beginPath();
+  cctx.strokeStyle='#6c63ff'; cctx.lineWidth=2;
+  data.forEach((v,i) => {
+    const x=pad+(w-2*pad)*i/(data.length-1);
+    const y=pad+(h-2*pad)*(1-(v-mn)/range);
+    i===0?cctx.moveTo(x,y):cctx.lineTo(x,y);
+  });
+  cctx.stroke();
+
+  // Labels
+  cctx.fillStyle='rgba(122,127,148,0.7)';
+  cctx.font='9px JetBrains Mono';
+  cctx.textAlign='left'; cctx.textBaseline='top';
+  cctx.fillText(Math.round(mx), pad+2, pad+2);
+  cctx.textBaseline='bottom';
+  cctx.fillText(Math.round(mn), pad+2, h-pad-2);
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+function setProgress(pct) {
+  document.getElementById('progFill').style.width = pct+'%';
+}
+
+function clearMetrics() {
+  ['mInitial','mBest','mImpr','mTime'].forEach(id=>document.getElementById(id).textContent='—');
+  setProgress(0);
+  document.getElementById('logBody').innerHTML='<span class="log-line info">// Iniciando optimización...</span>';
+}
+
+function updateMetrics(ic, bc, impr, ms) {
+  document.getElementById('mInitial').textContent = Math.round(ic);
+  document.getElementById('mBest').textContent = Math.round(bc);
+  document.getElementById('mImpr').textContent = impr+'%';
+  document.getElementById('mTime').textContent = ms+'ms';
+}
+
+function addLog(msg, type='') {
+  const body = document.getElementById('logBody');
+  const span = document.createElement('span');
+  span.className = 'log-line' + (type ? ' '+type : '');
+  span.textContent = msg;
+  body.appendChild(span);
+  body.scrollTop = body.scrollHeight;
+}
+
+async function checkApi() {
+  const url = document.getElementById('apiUrl').value.trim();
+  addLog(`[API] Verificando ${url}/health...`, 'info');
+  try {
+    const res = await fetch(`${url}/health`, { signal: AbortSignal.timeout(3000) });
+    const data = await res.json();
+    addLog(`[API] ✓ Conectado · ${data.service}`, 'success');
+    document.getElementById('statusDot').classList.add('active');
+    document.getElementById('statusText').textContent = 'API conectada';
+  } catch (e) {
+    addLog(`[API] ✗ Sin conexión · modo local activo`, 'warn');
+    document.getElementById('statusDot').classList.remove('active');
+    document.getElementById('statusText').textContent = 'frontend-only mode';
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  resizeCanvas();
+  genNodes();
+});
+</script>
+</body>
+</html>
 
